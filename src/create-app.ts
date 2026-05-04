@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 
 import { brandsRouter } from '@/routes/brands.js';
 import { infographicRouter } from '@/routes/infographic.js';
+import { slidesRouter } from '@/routes/slides.js';
 
 export function createApp(): Express {
   const app = express();
@@ -14,6 +15,7 @@ export function createApp(): Express {
   });
 
   app.use('/api/brands', brandsRouter());
+  app.use('/api/slides', slidesRouter());
   app.use('/api/infographic', infographicRouter());
 
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {

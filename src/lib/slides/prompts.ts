@@ -133,3 +133,46 @@ ${sourceMarkdown}
 
 Produce the JSON object with html + css for this single slide.
 `.trim();
+
+/**
+ * Editing prompt: same brand-aware aesthetic as content, plus instructions
+ * to apply a user-provided change with the chat history as context.
+ */
+export function buildEditPrompt(brand: Brand): string {
+  return `${buildContentPrompt(brand)}
+
+## Editing mode
+
+You are editing an EXISTING slide based on user feedback. The user message contains:
+- The current slide (id, title, layout, html, css)
+- A chat history of prior accepted edits
+- A new instruction in natural language
+
+Apply the new instruction. Honour the chat history — do not undo prior accepted edits unless the user asks. Return JSON:
+
+{ "summary": "...", "html": "...", "css": "..." }
+
+- summary: a single concise Spanish sentence describing what you changed (≤20 words). This becomes the assistant's reply in the chat.
+- html / css: the FULL updated slide (not a diff). Same single-line / scoping rules as the content prompt above.
+
+Return JSON only. No markdown fences, no explanation.`;
+}
+
+export const EDIT_USER_TEMPLATE = (
+  slide: { id: string; title: string; layout: string; html: string; css: string },
+  chat: ReadonlyArray<{ role: string; content: string }>,
+  message: string,
+): string => `
+## Current slide
+\`\`\`json
+${JSON.stringify(slide, null, 2)}
+\`\`\`
+
+## Chat history (previous accepted edits)
+${chat.length === 0 ? '(empty)' : chat.map((m) => `- ${m.role}: ${m.content}`).join('\n')}
+
+## New instruction
+${message}
+
+Produce the JSON object now.
+`.trim();
