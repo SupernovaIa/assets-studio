@@ -1,0 +1,23 @@
+{
+  "name": "thepower",
+  "displayName": "The Power",
+  "palette": {
+    "primary": "#1C3C42",
+    "accent": "#82C4AF",
+    "secondary": "#E8654A",
+    "surface": "#FFFFFF",
+    "text": "#1C3C42",
+    "textMuted": "rgba(28,60,66,0.62)"
+  },
+  "fonts": {
+    "heading": { "family": "Sora", "weights": [600, 700] },
+    "body": { "family": "Poppins", "weights": [400, 500, 600] }
+  },
+  "logo": {
+    "file": "logo_deco.png",
+    "position": "bottom-right"
+  },
+  "infographic": {
+    "styleHint": "editorial, clean, generous whitespace"
+  }
+}

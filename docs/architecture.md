@@ -92,7 +92,9 @@ brands/<nombre>/
 }
 ```
 
-El loader (`lib/brand.js`) lo lee, valida con un schema, y devuelve un objeto normalizado:
+> `logo.position` aplica solo a infografía (dónde compositea `sharp` el logo). En slides la posición la decide el chrome de cada tipo.
+
+El loader (`src/lib/brand.ts`) lo lee, valida con zod, y devuelve un objeto normalizado:
 
 ```js
 {

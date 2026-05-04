@@ -1,0 +1,19 @@
+{
+  "name": "default",
+  "displayName": "Default",
+  "palette": {
+    "primary": "#111827",
+    "accent": "#2563EB",
+    "secondary": "#6B7280",
+    "surface": "#FFFFFF",
+    "text": "#111827",
+    "textMuted": "rgba(17,24,39,0.62)"
+  },
+  "fonts": {
+    "heading": { "family": "Inter", "weights": [600, 700] },
+    "body": { "family": "Inter", "weights": [400, 500, 600] }
+  },
+  "infographic": {
+    "styleHint": "editorial, clean, neutral"
+  }
+}
