@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "tsx watch --clear-screen=false src/server.ts",
+    "generate": "tsx src/generate.ts",
     "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
     "test": "vitest run",
