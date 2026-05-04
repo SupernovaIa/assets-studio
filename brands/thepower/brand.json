@@ -10,7 +10,7 @@
     "textMuted": "rgba(28,60,66,0.62)"
   },
   "fonts": {
-    "heading": { "family": "Sora", "weights": [600, 700] },
+    "heading": { "family": "Poppins", "weights": [600, 700] },
     "body": { "family": "Poppins", "weights": [400, 500, 600] }
   },
   "logo": {

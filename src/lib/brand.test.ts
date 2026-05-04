@@ -23,8 +23,8 @@ describe('loadBrand (real brands/)', () => {
     expect(brand.logo).not.toBeNull();
     expect(brand.logo?.dataUrl.startsWith('data:image/png;base64,')).toBe(true);
     expect(brand.logo?.position).toBe('bottom-right');
-    expect(brand.fonts.googleFontsUrl).toContain('family=Sora');
     expect(brand.fonts.googleFontsUrl).toContain('family=Poppins');
+    expect(brand.briefExemplar.length).toBeGreaterThan(0);
   });
 
   it('falls back to default when the brand does not exist', async () => {

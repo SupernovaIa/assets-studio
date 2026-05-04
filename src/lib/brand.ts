@@ -57,6 +57,13 @@ export interface Brand {
   };
   logo: { dataUrl: string; position: LogoPosition } | null;
   extraCss: string;
+  /**
+   * Per-brand visual brief exemplar — a hand-tuned full prompt that has been
+   * validated to render well in gpt-image-2 for this brand's aesthetic.
+   * Falls back to the default brand's exemplar if the brand has none.
+   * Empty string if neither is available.
+   */
+  briefExemplar: string;
   infographic: { styleHint: string };
 }
 
@@ -110,7 +117,22 @@ async function readBrandJson(brandDir: string): Promise<BrandJson> {
   return result.data;
 }
 
-async function normalize(brandDir: string, json: BrandJson): Promise<Brand> {
+async function loadBriefExemplar(brandsDir: string, brandDir: string): Promise<string> {
+  const own = await readOptional(path.join(brandDir, 'brief-exemplar.txt'));
+  if (own !== null) {
+    return own.trim();
+  }
+  // Fall back to the default brand's exemplar (skip if this IS default).
+  if (path.basename(brandDir) === DEFAULT_BRAND_NAME) {
+    return '';
+  }
+  const fallback = await readOptional(
+    path.join(brandsDir, DEFAULT_BRAND_NAME, 'brief-exemplar.txt'),
+  );
+  return fallback?.trim() ?? '';
+}
+
+async function normalize(brandsDir: string, brandDir: string, json: BrandJson): Promise<Brand> {
   let logo: Brand['logo'] = null;
   if (json.logo) {
     const buf = await readFile(path.join(brandDir, json.logo.file));
@@ -123,6 +145,7 @@ async function normalize(brandDir: string, json: BrandJson): Promise<Brand> {
   }
 
   const extraCss = (await readOptional(path.join(brandDir, 'extra.css'))) ?? '';
+  const briefExemplar = await loadBriefExemplar(brandsDir, brandDir);
 
   return {
     name: json.name,
@@ -135,6 +158,7 @@ async function normalize(brandDir: string, json: BrandJson): Promise<Brand> {
     },
     logo,
     extraCss,
+    briefExemplar,
     infographic: { styleHint: json.infographic?.styleHint ?? '' },
   };
 }
@@ -143,7 +167,7 @@ async function tryLoad(brandsDir: string, name: string): Promise<Brand | null> {
   const dir = path.join(brandsDir, name);
   try {
     const json = await readBrandJson(dir);
-    return await normalize(dir, json);
+    return await normalize(brandsDir, dir, json);
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
       return null;

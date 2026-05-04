@@ -37,8 +37,8 @@ markdown ──► [brief LLM] ──► visual brief (texto descriptivo)
                                                 └──► [composite logo] ──► PNG final
 ```
 
-- **Brief**: un LLM sintetiza el markdown en un prompt visual rico (estructura del póster, métricas, paleta del brand inyectada).
-- **Imagen**: `gpt-image-2` a 1792×1024 (horizontal). Devuelve PNG.
+- **Brief**: una llamada a Anthropic Sonnet con system prompt minimalista + el `brief-exemplar.txt` del brand como ejemplo conversacional (few-shot). Sonnet adapta el ejemplo al documento y al brand. Sustituye paleta y fonts del brand sobre los del exemplar.
+- **Imagen**: `gpt-image-2` a 2048×1024 (horizontal, 2K). Devuelve PNG.
 - **Logo**: el modelo no genera logos legibles. Se compositea con `sharp` en post sobre la esquina configurada en el brand.
 - **Wrapper HTML**: el PNG se sirve embebido en una página simple con botón "Imprimir / Descargar".
 
@@ -59,9 +59,10 @@ Un brand es **datos**, no código. Vive en `brands/<nombre>/`:
 
 ```
 brands/<nombre>/
-  brand.json     ← contrato (ver abajo)
-  logo.png       ← opcional
-  extra.css      ← opcional, overrides finos
+  brand.json              ← contrato (ver abajo)
+  logo.png                ← opcional
+  extra.css               ← opcional, overrides finos
+  brief-exemplar.txt      ← opcional, prompt validado para infografía
 ```
 
 ### `brand.json`
@@ -103,6 +104,7 @@ El loader (`src/lib/brand.ts`) lo lee, valida con zod, y devuelve un objeto norm
   fonts: { heading, body, googleFontsUrl },
   logo: { dataUrl, position } | null,
   extraCss: string | "",
+  briefExemplar: string,    // contenido de brief-exemplar.txt; fallback a default si no existe
   infographic: { styleHint }
 }
 ```
