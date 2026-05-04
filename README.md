@@ -18,11 +18,15 @@ cp .env.example .env   # ANTHROPIC_API_KEY, OPENAI_API_KEY
 npm run dev            # http://localhost:3000/studio/
 ```
 
-CLI:
+CLI (a partir de Fase 2):
 ```bash
-node generate.js input.md --service=slides --brand=thepower
-node generate.js input.md --service=infographic --brand=default
+npm run generate -- input.md --service=slides --brand=thepower
+npm run generate -- input.md --service=infographic --brand=default
 ```
+
+## Stack
+
+TypeScript + ESM + Express 5 + Vitest. Alineado con `ai-learning-engine` para migración futura sin reescritura.
 
 ## Estructura
 
@@ -30,15 +34,17 @@ node generate.js input.md --service=infographic --brand=default
 brands/
   default/              ← brand agnóstico de fallback
   thepower/             ← brand de ejemplo
-lib/
-  brand.js              ← loadBrand(name) → objeto normalizado
-  slides/               ← pipeline de slides (LLM HTML+CSS)
-  infographic/          ← pipeline de infografía (gpt-image-2)
-  cheatsheet/           ← TBD
-  create-app.js         ← Express factory (DI, testable)
+src/
+  server.ts             ← entry point
+  create-app.ts         ← Express factory (DI, testable)
+  config.ts             ← env loader
+  generate.ts           ← CLI (Fase 2+)
+  lib/
+    brand.ts            ← loadBrand(name) → objeto normalizado
+    slides/             ← pipeline de slides (LLM HTML+CSS)
+    infographic/        ← pipeline de infografía (gpt-image-2)
+    cheatsheet/         ← TBD
 frontend-studio/        ← SPA del editor
-server.js               ← entry point
-generate.js             ← CLI
 docs/
   architecture.md
   roadmap.md

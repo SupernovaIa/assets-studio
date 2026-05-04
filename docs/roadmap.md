@@ -4,17 +4,20 @@ Construcción en fases. Cada fase tiene un criterio de "hecho" claro. No avanzar
 
 ## Fase 0 — Andamiaje
 
-- `package.json` con `express`, `@anthropic-ai/sdk`, `openai`, `sharp`, `dotenv`
-- `.env.example` con `ANTHROPIC_API_KEY` y `OPENAI_API_KEY`
-- `server.js` minimal + `lib/create-app.js` con DI
-- Estructura de carpetas (`brands/`, `lib/{slides,infographic}`, `frontend-studio/`)
-- `npm test` con `node:test` + `supertest` (aunque sea un test trivial)
+Stack: TypeScript + ESM + Express 5 + Vitest, alineado con `ai-learning-engine` para que la migración futura sea un `mv`.
+
+- `package.json` con `express`, `@anthropic-ai/sdk`, `openai`, `sharp`, `dotenv` + devDeps de TS, ESLint, Prettier, Vitest
+- `tsconfig.json` (strict, `nodenext`, paths `@/* → src/*`), `vitest.config.ts`, `eslint.config.mjs` (baseConfig copiado de ai-learning-engine), `.prettierrc`
+- `.env.example` con `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `PORT`
+- `src/server.ts` minimal + `src/create-app.ts` con DI + `src/config.ts` (env loader)
+- Estructura de carpetas (`brands/`, `src/lib/{slides,infographic}/`, `frontend-studio/`)
+- `npm test` con Vitest + `supertest` (aunque sea un test trivial)
 
 **Hecho cuando**: `npm run dev` levanta y `GET /` devuelve algo.
 
 ## Fase 1 — Brand loader
 
-- `lib/brand.js` con `loadBrand(name)` y validación del schema
+- `src/lib/brand.ts` con `loadBrand(name)` y validación del schema (zod)
 - `brands/default/brand.json` (paleta neutra, Inter, sin logo)
 - `brands/thepower/brand.json` migrado del repo viejo
 - `GET /api/brands` lista los disponibles
@@ -25,24 +28,24 @@ Construcción en fases. Cada fase tiene un criterio de "hecho" claro. No avanzar
 ## Fase 2 — Slides
 
 - Prompts (outline + content) parametrizados con tokens del brand
-- `lib/slides/generate.js` con las dos fases en paralelo
+- `src/lib/slides/generate.ts` con las dos fases en paralelo
 - Validación heurística + retry ×2
-- `lib/slides/render.js` ensambla el HTML final autocontenido
-- `lib/slides/edit.js` para edición conversacional
+- `src/lib/slides/render.ts` ensambla el HTML final autocontenido
+- `src/lib/slides/edit.ts` para edición conversacional
 - Endpoints `/api/slides/{generate,edit,preview,download}`
 - Logging por ejecución en `logs/<timestamp>/`
 
-**Hecho cuando**: `node generate.js input.md --service=slides --brand=thepower` produce un HTML que se ve bien en el navegador y la edición conversacional funciona.
+**Hecho cuando**: `npm run generate -- input.md --service=slides --brand=thepower` produce un HTML que se ve bien en el navegador y la edición conversacional funciona.
 
 ## Fase 3 — Infografía
 
-- `lib/infographic/brief.js` — LLM produce visual brief con tokens del brand
-- `lib/infographic/image.js` — llama a `gpt-image-2`, devuelve PNG
-- `lib/infographic/composite.js` — `sharp` overlay del logo
+- `src/lib/infographic/brief.ts` — LLM produce visual brief con tokens del brand
+- `src/lib/infographic/image.ts` — llama a `gpt-image-2`, devuelve PNG
+- `src/lib/infographic/composite.ts` — `sharp` overlay del logo
 - Endpoint `/api/infographic`
 - CLI flag `--service=infographic`
 
-**Hecho cuando**: `node generate.js input.md --service=infographic --brand=thepower` produce un PNG que respeta la paleta y tiene el logo en la esquina correcta.
+**Hecho cuando**: `npm run generate -- input.md --service=infographic --brand=thepower` produce un PNG que respeta la paleta y tiene el logo en la esquina correcta.
 
 ## Fase 4 — Studio UI
 

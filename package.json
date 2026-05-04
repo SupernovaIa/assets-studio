@@ -1,0 +1,46 @@
+{
+  "name": "slides-studio",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/server.ts",
+    "build": "tsc && tsc-alias",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "format": "prettier --write \"src/**/*.ts\" \"*.config.ts\" \"*.config.mjs\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"*.config.ts\" \"*.config.mjs\""
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.92.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "openai": "^4.0.0",
+    "sharp": "^0.34.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.19.17",
+    "@types/supertest": "^6.0.2",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-no-relative-import-paths": "^1.6.1",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "globals": "^16.5.0",
+    "prettier": "^3.4.2",
+    "supertest": "^7.2.2",
+    "tsc-alias": "^1.8.10",
+    "tsx": "^4.20.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.46.4",
+    "vitest": "^2.1.0"
+  }
+}
