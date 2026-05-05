@@ -352,6 +352,28 @@ const COMPONENT_CSS = `
 }
 .slide-root .comp-row:last-child { border-bottom: none; }
 
+/* Horizontal flow diagram (process with arrows) */
+.slide-root .flow {
+  display: flex; align-items: stretch; gap: 0;
+  flex-wrap: nowrap; overflow: hidden;
+}
+.slide-root .flow-node {
+  background: var(--accent-pale);
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  padding: 14px 16px; text-align: center;
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column; justify-content: center; gap: 4px;
+}
+.slide-root .flow-node .fn-icon  { font-size: 22px; color: var(--accent); }
+.slide-root .flow-node .fn-label { font-size: 12px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
+.slide-root .flow-node .fn-sub   { font-size: 10.5px; color: var(--text-muted); line-height: 1.4; }
+.slide-root .flow-arrow {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--accent);
+  padding: 0 10px; flex-shrink: 0;
+}
+
 /* Pill / tag */
 .slide-root .tag {
   display: inline-block;

@@ -47,6 +47,7 @@ Content slides always use the brand surface (white) as background and dark text.
 | \`.callout.note\` / \`.callout.warn\` / \`.callout.success\` | coloured top border + soft bg + circular \`.icon\` + \`.callout-title\` + \`.callout-body\` |
 | \`.cards > .card\` | 3-column grid; each card has \`.card-icon\` \`.card-title\` \`.card-body\` |
 | \`.steps > .step\` | numbered process; each step: \`<div class="step-num">N</div><div class="step-text">…</div>\` |
+| \`.flow\` | horizontal process with arrows; alternate \`.flow-node\` (with \`.fn-icon\` + \`.fn-label\` + optional \`.fn-sub\`) and \`.flow-arrow\` (use \`→\` as content) |
 | \`.comp-grid\` | yes/no comparison; \`.comp-col.yes\` / \`.comp-col.no\` with \`.comp-header\` + \`.comp-body\` containing \`.comp-row\`s |
 | \`.tag\` | small pill label |
 
@@ -100,6 +101,12 @@ Failure mode: 2 short bullets centred on white space. Avoid.
     "html": "<div class=\\"comp-grid\\"><div class=\\"comp-col yes\\"><div class=\\"comp-header\\">Sirve para</div><div class=\\"comp-body\\"><div class=\\"comp-row\\">Reconocer patrones complejos en imágenes y audio.</div><div class=\\"comp-row\\">Predecir series temporales con suficientes datos.</div></div></div><div class=\\"comp-col no\\"><div class=\\"comp-header\\">No sirve para</div><div class=\\"comp-body\\"><div class=\\"comp-row\\">Casos con muy pocos datos etiquetados.</div><div class=\\"comp-row\\">Decisiones que exigen explicabilidad estricta.</div></div></div></div>",
     "css": ""
   },
+  {
+    "type": "content", "id": "s5", "moduleLabel": "MÓDULO 1 · TEMA 1",
+    "title": "Pipeline de entrenamiento", "layout": "flow", "items": 4,
+    "html": "<span class=\\"label\\">Etapas</span><div class=\\"accent-line\\"></div><div class=\\"flow\\"><div class=\\"flow-node\\"><div class=\\"fn-icon\\">▣</div><div class=\\"fn-label\\">Datos</div><div class=\\"fn-sub\\">Carga y limpieza</div></div><div class=\\"flow-arrow\\">→</div><div class=\\"flow-node\\"><div class=\\"fn-icon\\">∇</div><div class=\\"fn-label\\">Forward</div><div class=\\"fn-sub\\">Predicción</div></div><div class=\\"flow-arrow\\">→</div><div class=\\"flow-node\\"><div class=\\"fn-icon\\">∂</div><div class=\\"fn-label\\">Loss</div><div class=\\"fn-sub\\">Error vs target</div></div><div class=\\"flow-arrow\\">→</div><div class=\\"flow-node\\"><div class=\\"fn-icon\\">↻</div><div class=\\"fn-label\\">Backward</div><div class=\\"fn-sub\\">Actualiza pesos</div></div></div>",
+    "css": "#s5 .flow { margin-top:10px; }"
+  },
   { "type": "thanks", "text": "¡Hasta la próxima!", "tagline": "Gracias por seguir aprendiendo." }
 ]
 \`\`\`
@@ -119,7 +126,7 @@ You are editing a single slide in an educational deck. The deck uses a shared co
 \`var(--primary)\` ${brand.palette.primary}, \`var(--accent)\` ${brand.palette.accent}, \`var(--surface)\` ${brand.palette.surface}, \`var(--text)\` ${brand.palette.text}, \`var(--text-muted)\` ${brand.palette.textMuted}, \`var(--success)\`, \`var(--warning)\`, \`var(--danger)\`, \`var(--accent-pale)\`. Fonts: \`var(--font-heading)\`, \`var(--font-body)\`, \`var(--font-mono)\`.
 
 ## Components available (do NOT redefine their styles)
-\`.label\`, \`.body\`, \`.sub\`, \`.dim\`, \`.accent-line\`, \`.hero\`, \`.bullets\`, \`<code>\`, \`.code-block\` (\`.kw\`/\`.str\`/\`.cm\`/\`.fg\`), \`.callout.note\`/\`.warn\`/\`.success\`, \`.cards > .card\`, \`.steps > .step\`, \`.comp-grid\`, \`.tag\`.
+\`.label\`, \`.body\`, \`.sub\`, \`.dim\`, \`.accent-line\`, \`.hero\`, \`.bullets\`, \`<code>\`, \`.code-block\` (\`.kw\`/\`.str\`/\`.cm\`/\`.fg\`), \`.callout.note\`/\`.warn\`/\`.success\`, \`.cards > .card\`, \`.steps > .step\`, \`.flow\` (\`.flow-node\`/\`.flow-arrow\`), \`.comp-grid\`, \`.tag\`.
 
 ## Constraints
 - CSS scoped to \`#sN\`, layout-only (positioning, gaps, sizing). Never redefine component typography or colours.
