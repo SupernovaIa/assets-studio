@@ -106,12 +106,45 @@ export function buildShowcaseSlides(): Slide[] {
 
     {
       type: 'content',
+      id: 'sc-quote',
+      moduleLabel,
+      title: '.quote-wrap (hero quote slide)',
+      layout: 'showcase',
+      items: 1,
+      html: '<div class="quote-wrap"><div class="big-quote">"</div><blockquote class="quote-text">Composability beats configurability. Every time you let someone configure a thing, you take a knob away from the next person.</blockquote><div class="quote-author">Pieter Hintjens — ZeroMQ author</div></div>',
+      css: '',
+    },
+
+    {
+      type: 'content',
+      id: 'sc-stat',
+      moduleLabel,
+      title: '.stat-grid + .stat-card (KPIs)',
+      layout: 'showcase',
+      items: 3,
+      html: '<span class="label">North-star metrics</span><div class="accent-line"></div><div class="stat-grid"><div class="stat-card"><div class="stat-num">94%</div><div class="stat-label">Retention 30d</div><div class="stat-sub">Usuarios activos un mes después del onboarding</div><span class="tag good" style="margin-top:6px;">Saludable</span></div><div class="stat-card"><div class="stat-num">2.4×</div><div class="stat-label">LTV / CAC</div><div class="stat-sub">Valor de vida sobre coste de adquisición</div><span class="tag warn" style="margin-top:6px;">Vigilar</span></div><div class="stat-card"><div class="stat-num">18%</div><div class="stat-label">Churn anual</div><div class="stat-sub">Bajas voluntarias en los últimos 12 meses</div><span class="tag bad" style="margin-top:6px;">Crítico</span></div></div>',
+      css: '#sc-stat .stat-grid { margin-top:8px; }',
+    },
+
+    {
+      type: 'content',
+      id: 'sc-journey',
+      moduleLabel,
+      title: '.journey (process with arrows + metrics)',
+      layout: 'showcase',
+      items: 4,
+      html: '<span class="label">Funnel de activación</span><div class="accent-line"></div><div class="journey"><div class="j-step"><div class="j-card"><div class="j-num">1</div><div class="j-title">Sign-up</div><div class="j-desc">El usuario crea cuenta con email o SSO.</div><div class="j-metric">100%</div></div></div><div class="j-step"><div class="j-card"><div class="j-num">2</div><div class="j-title">Onboarding</div><div class="j-desc">Tutorial interactivo de tres pasos clave.</div><div class="j-metric">72%</div></div></div><div class="j-step"><div class="j-card"><div class="j-num">3</div><div class="j-title">First value</div><div class="j-desc">Completa la primera acción significativa.</div><div class="j-metric">48%</div></div></div><div class="j-step"><div class="j-card"><div class="j-num">4</div><div class="j-title">Habit</div><div class="j-desc">Vuelve por su cuenta tres veces en 7 días.</div><div class="j-metric">31%</div></div></div></div>',
+      css: '#sc-journey .journey { margin-top:8px; }',
+    },
+
+    {
+      type: 'content',
       id: 'sc-tag',
       moduleLabel,
       title: '.tag (pill label)',
       layout: 'showcase',
       items: 1,
-      html: '<span class="label">Pill labels for categories or filters</span><div class="accent-line"></div><div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:8px;"><span class="tag">Backend</span><span class="tag">Infra</span><span class="tag">Observability</span><span class="tag">Security</span><span class="tag">Performance</span><span class="tag">Frontend</span></div><p class="body" style="margin-top:24px;">Background <code>var(--accent)</code>, foreground <code>var(--accent-ink)</code> — el ink se calcula a partir de la luminancia del accent, así que el contraste se mantiene en cualquier brand.</p>',
+      html: '<span class="label">Default + semantic variants</span><div class="accent-line"></div><div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:8px;"><span class="tag">Backend</span><span class="tag">Infra</span><span class="tag">Frontend</span><span class="tag good">Saludable</span><span class="tag warn">Vigilar</span><span class="tag bad">Crítico</span></div><p class="body" style="margin-top:22px;">El tag default usa <code>var(--accent)</code> como fondo y <code>var(--accent-ink)</code> (calculado por luminancia) como texto. Las variantes <code>.good</code>, <code>.warn</code> y <code>.bad</code> tintan el fondo con el color semántico al 16-18% sobre la superficie y usan ese mismo color como texto.</p>',
       css: '',
     },
 

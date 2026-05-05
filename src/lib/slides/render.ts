@@ -374,13 +374,101 @@ const COMPONENT_CSS = `
   padding: 0 10px; flex-shrink: 0;
 }
 
-/* Pill / tag */
+/* Pill / tag (default + semantic variants) */
 .slide-root .tag {
   display: inline-block;
   font-size: 10px; font-weight: 700;
   letter-spacing: 0.12em; text-transform: uppercase;
   background: var(--accent); color: var(--accent-ink);
   padding: 4px 12px; border-radius: 20px;
+}
+.slide-root .tag.good {
+  background: color-mix(in srgb, var(--success) 16%, var(--surface));
+  color: var(--success);
+}
+.slide-root .tag.bad {
+  background: color-mix(in srgb, var(--danger) 16%, var(--surface));
+  color: var(--danger);
+}
+.slide-root .tag.warn {
+  background: color-mix(in srgb, var(--warning) 18%, var(--surface));
+  color: var(--warning);
+}
+
+/* Quote slide — decorative giant quote + statement + author */
+.slide-root .quote-wrap {
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: center; position: relative;
+}
+.slide-root .big-quote {
+  position: absolute; top: -16px; left: -10px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 140px; font-weight: 800; line-height: 1;
+  color: var(--accent); opacity: 0.16;
+  pointer-events: none; user-select: none;
+}
+.slide-root .quote-text {
+  position: relative; z-index: 1;
+  font-size: 28px; font-weight: 600; line-height: 1.35;
+  color: var(--text); max-width: 800px;
+}
+.slide-root .quote-author {
+  margin-top: 22px; font-size: 13px; font-weight: 500;
+  color: var(--accent);
+  display: flex; align-items: center; gap: 12px;
+}
+.slide-root .quote-author::before {
+  content: ''; display: block; width: 28px; height: 2px;
+  background: var(--accent);
+}
+
+/* Stat / KPI grid */
+.slide-root .stat-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+}
+.slide-root .stat-card {
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-top: 3px solid var(--accent);
+  border-radius: 10px;
+  padding: 20px 22px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.slide-root .stat-num {
+  font-family: var(--font-heading);
+  font-size: 40px; font-weight: 800; line-height: 1;
+  color: var(--accent);
+}
+.slide-root .stat-label { font-size: 13px; font-weight: 700; color: var(--text); }
+.slide-root .stat-sub   { font-size: 12px; font-weight: 400; color: var(--text-muted); line-height: 1.55; }
+
+/* Journey — process with arrows + per-step metric */
+.slide-root .journey { display: flex; align-items: stretch; gap: 14px; }
+.slide-root .j-step  { flex: 1; min-width: 0; position: relative; display: flex; }
+.slide-root .j-step:not(:last-child)::after {
+  content: '→'; position: absolute; right: -12px; top: 22px;
+  font-size: 18px; color: var(--accent); z-index: 2;
+}
+.slide-root .j-card {
+  flex: 1; display: flex; flex-direction: column; gap: 6px;
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-radius: 10px;
+  padding: 16px 14px;
+}
+.slide-root .j-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent); color: var(--accent-ink);
+  font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.slide-root .j-title  { font-size: 13px; font-weight: 700; color: var(--text); margin-top: 4px; }
+.slide-root .j-desc   { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; flex: 1; }
+.slide-root .j-metric {
+  margin-top: 4px; padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--accent);
 }
 `.trim();
 

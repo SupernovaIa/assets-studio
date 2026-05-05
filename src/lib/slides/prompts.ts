@@ -48,8 +48,11 @@ Content slides always use the brand surface (white) as background and dark text.
 | \`.cards > .card\` | 3-column grid; each card has \`.card-icon\` \`.card-title\` \`.card-body\` |
 | \`.steps > .step\` | numbered process; each step: \`<div class="step-num">N</div><div class="step-text">…</div>\` |
 | \`.flow\` | horizontal process with arrows; alternate \`.flow-node\` (with \`.fn-icon\` + \`.fn-label\` + optional \`.fn-sub\`) and \`.flow-arrow\` (use \`→\` as content) |
+| \`.journey\` | richer process: \`.j-step > .j-card\` with \`.j-num\` (circle), \`.j-title\`, \`.j-desc\`, optional \`.j-metric\` (uppercase footer). Arrow appears between steps automatically |
 | \`.comp-grid\` | yes/no comparison; \`.comp-col.yes\` / \`.comp-col.no\` with \`.comp-header\` + \`.comp-body\` containing \`.comp-row\`s |
-| \`.tag\` | small pill label |
+| \`.stat-grid > .stat-card\` | KPI grid (3 cols); each card: \`.stat-num\` (big number), \`.stat-label\`, \`.stat-sub\`, optional \`.tag.good/.bad/.warn\` |
+| \`.quote-wrap\` | quote slide; contains \`.big-quote\` (decorative \`"\`), \`.quote-text\` (main statement), \`.quote-author\`. Centre vertically — this is a hero slide |
+| \`.tag\` | small pill label. Variants: \`.tag.good\` (green), \`.tag.bad\` (red), \`.tag.warn\` (amber) for stat cards or status |
 
 ## Per-slide CSS — only for LAYOUT
 Use the \`css\` field for positioning, gaps, custom grids, sizing — scoped to \`#sN\`. Do NOT redefine component typography, colours or backgrounds. Example: \`#s2 .row { display:flex; gap:32px; }\` ✅. \`#s2 .body { font-size: 18px; }\` ❌.
@@ -126,7 +129,7 @@ You are editing a single slide in an educational deck. The deck uses a shared co
 \`var(--primary)\` ${brand.palette.primary}, \`var(--accent)\` ${brand.palette.accent}, \`var(--surface)\` ${brand.palette.surface}, \`var(--text)\` ${brand.palette.text}, \`var(--text-muted)\` ${brand.palette.textMuted}, \`var(--success)\`, \`var(--warning)\`, \`var(--danger)\`, \`var(--accent-pale)\`. Fonts: \`var(--font-heading)\`, \`var(--font-body)\`, \`var(--font-mono)\`.
 
 ## Components available (do NOT redefine their styles)
-\`.label\`, \`.body\`, \`.sub\`, \`.dim\`, \`.accent-line\`, \`.hero\`, \`.bullets\`, \`<code>\`, \`.code-block\` (\`.kw\`/\`.str\`/\`.cm\`/\`.fg\`), \`.callout.note\`/\`.warn\`/\`.success\`, \`.cards > .card\`, \`.steps > .step\`, \`.flow\` (\`.flow-node\`/\`.flow-arrow\`), \`.comp-grid\`, \`.tag\`.
+\`.label\`, \`.body\`, \`.sub\`, \`.dim\`, \`.accent-line\`, \`.hero\`, \`.bullets\`, \`<code>\`, \`.code-block\` (\`.kw\`/\`.str\`/\`.cm\`/\`.fg\`), \`.callout.note\`/\`.warn\`/\`.success\`, \`.cards > .card\`, \`.steps > .step\`, \`.flow\` (\`.flow-node\`/\`.flow-arrow\`), \`.journey\` (\`.j-step\`/\`.j-card\`/\`.j-num\`/\`.j-title\`/\`.j-desc\`/\`.j-metric\`), \`.comp-grid\`, \`.stat-grid > .stat-card\` (\`.stat-num\`/\`.stat-label\`/\`.stat-sub\`), \`.quote-wrap\` (\`.big-quote\`/\`.quote-text\`/\`.quote-author\`), \`.tag\` (\`.good\`/\`.bad\`/\`.warn\`).
 
 ## Constraints
 - CSS scoped to \`#sN\`, layout-only (positioning, gaps, sizing). Never redefine component typography or colours.
