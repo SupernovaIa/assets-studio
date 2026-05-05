@@ -442,6 +442,37 @@ const COMPONENT_CSS = `
 .slide-root .stat-label { font-size: 13px; font-weight: 700; color: var(--text); }
 .slide-root .stat-sub   { font-size: 12px; font-weight: 400; color: var(--text-muted); line-height: 1.55; }
 
+/* Pill list — alternative to .bullets, each item in a rounded chip */
+.slide-root .pill-list { display: flex; flex-direction: column; gap: 10px; }
+.slide-root .pill-item {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 40px; padding: 10px 18px;
+  font-size: 13px; color: var(--text); line-height: 1.4;
+}
+.slide-root .pill-item .pill-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+}
+
+/* Progress bars — labelled bar with gradient fill */
+.slide-root .prog-list { display: flex; flex-direction: column; gap: 16px; }
+.slide-root .prog-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 12.5px; font-weight: 600; margin-bottom: 6px;
+}
+.slide-root .prog-label { color: var(--text); }
+.slide-root .prog-val   { color: var(--accent); font-weight: 700; }
+.slide-root .prog-bar {
+  height: 6px; background: var(--rule);
+  border-radius: 3px; overflow: hidden;
+}
+.slide-root .prog-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 60%, var(--primary)));
+}
+
 /* Journey — process with arrows + per-step metric */
 .slide-root .journey { display: flex; align-items: stretch; gap: 14px; }
 .slide-root .j-step  { flex: 1; min-width: 0; position: relative; display: flex; }

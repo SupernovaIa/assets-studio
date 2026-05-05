@@ -139,6 +139,28 @@ export function buildShowcaseSlides(): Slide[] {
 
     {
       type: 'content',
+      id: 'sc-pill',
+      moduleLabel,
+      title: '.pill-list (rounded chip list)',
+      layout: 'showcase',
+      items: 5,
+      html: '<span class="label">Lighter alternative to bullets</span><div class="accent-line"></div><div class="pill-list"><div class="pill-item"><span class="pill-dot"></span><span>Componentes con dot prefix y borde redondeado</span></div><div class="pill-item"><span class="pill-dot"></span><span>Funciona bien para listas de 3-6 elementos cortos</span></div><div class="pill-item"><span class="pill-dot"></span><span>El dot toma el color accent del brand</span></div><div class="pill-item"><span class="pill-dot"></span><span>Mantén cada ítem en una sola línea visual</span></div><div class="pill-item"><span class="pill-dot"></span><span>Si necesitas más texto por ítem usa <code>.bullets</code></span></div></div>',
+      css: '#sc-pill .pill-list { margin-top:8px; }',
+    },
+
+    {
+      type: 'content',
+      id: 'sc-prog',
+      moduleLabel,
+      title: '.prog-list (progress bars)',
+      layout: 'showcase',
+      items: 4,
+      html: '<span class="label">Skill mastery / project completion</span><div class="accent-line"></div><div class="prog-list"><div class="prog-item"><div class="prog-header"><span class="prog-label">Component library</span><span class="prog-val">95%</span></div><div class="prog-bar"><div class="prog-fill" style="width:95%"></div></div></div><div class="prog-item"><div class="prog-header"><span class="prog-label">Brand themes</span><span class="prog-val">80%</span></div><div class="prog-bar"><div class="prog-fill" style="width:80%"></div></div></div><div class="prog-item"><div class="prog-header"><span class="prog-label">Edit endpoint</span><span class="prog-val">62%</span></div><div class="prog-bar"><div class="prog-fill" style="width:62%"></div></div></div><div class="prog-item"><div class="prog-header"><span class="prog-label">Logo / footer</span><span class="prog-val">10%</span></div><div class="prog-bar"><div class="prog-fill" style="width:10%"></div></div></div></div>',
+      css: '#sc-prog .prog-list { margin-top:10px; }',
+    },
+
+    {
+      type: 'content',
       id: 'sc-tag',
       moduleLabel,
       title: '.tag (pill label)',
