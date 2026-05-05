@@ -6,3 +6,8 @@ coverage
 logs
 output
 .DS_Store
+
+# Skill tooling (npx skills add)
+.agents/
+.claude/
+skills-lock.json
