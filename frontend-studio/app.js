@@ -7,8 +7,44 @@ const state = {
   slides: [],
   chats: [],
   selectedIndex: -1,
+  markdown: '',
   infographic: null, // { imageUrl, html }
 };
+
+// ── Persistence ─────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'slides-studio:v1';
+
+function saveState() {
+  try {
+    const snapshot = {
+      brand: state.brand,
+      showLogo: state.showLogo,
+      slides: state.slides,
+      chats: state.chats,
+      selectedIndex: state.selectedIndex,
+      markdown: state.markdown,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+  } catch (err) {
+    console.warn('saveState failed', err);
+  }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (typeof s.brand === 'string') state.brand = s.brand;
+    if (typeof s.showLogo === 'boolean') state.showLogo = s.showLogo;
+    if (Array.isArray(s.slides)) state.slides = s.slides;
+    if (Array.isArray(s.chats)) state.chats = s.chats;
+    if (Number.isInteger(s.selectedIndex)) state.selectedIndex = s.selectedIndex;
+    if (typeof s.markdown === 'string') state.markdown = s.markdown;
+  } catch (err) {
+    console.warn('loadState failed', err);
+  }
+}
 
 // ── DOM helpers ─────────────────────────────────────────────────────────────
 const $ = (id) => document.getElementById(id);
@@ -53,6 +89,7 @@ async function loadBrands() {
     select.value = state.brand;
     select.addEventListener('change', () => {
       state.brand = select.value;
+      saveState();
       // No LLM call needed: slides reference brand vars, so re-rendering
       // with a different brand recolours/refonts the deck for free.
       if (state.slides.length > 0) {
@@ -71,6 +108,7 @@ function initLogoToggle() {
   cb.checked = state.showLogo;
   cb.addEventListener('change', () => {
     state.showLogo = cb.checked;
+    saveState();
     if (state.slides.length > 0) {
       refreshPreview();
     }
@@ -144,6 +182,7 @@ function renderEditPanel() {
 
 function openEditPanel(index) {
   state.selectedIndex = index;
+  saveState();
   renderSlidesList();
   renderEditPanel();
   $('edit-message').focus();
@@ -151,6 +190,7 @@ function openEditPanel(index) {
 
 function closeEditPanel() {
   state.selectedIndex = -1;
+  saveState();
   renderSlidesList();
   renderEditPanel();
 }
@@ -169,6 +209,7 @@ async function generateSlides() {
     state.slides = data.slides;
     state.chats = data.slides.map(() => []);
     state.selectedIndex = -1;
+    saveState();
     renderSlidesList();
     renderEditPanel();
     await refreshPreview();
@@ -200,6 +241,7 @@ async function sendEdit() {
     const data = await res.json();
     state.slides = data.slides;
     state.chats = data.chats;
+    saveState();
     $('edit-message').value = '';
     renderEditPanel();
     await refreshPreview();
@@ -265,7 +307,20 @@ async function generateInfographic() {
 }
 
 // ── Wire up ────────────────────────────────────────────────────────────────
+async function rehydrate() {
+  const ta = $('slides-md');
+  if (ta && state.markdown) ta.value = state.markdown;
+  if (state.slides.length > 0) {
+    renderSlidesList();
+    renderEditPanel();
+    $('slides-download').disabled = false;
+    await refreshPreview();
+    setStatus($('slides-status'), `Restaurado: ${state.slides.length} slides`);
+  }
+}
+
 function init() {
+  loadState();
   initTabs();
   loadBrands();
   initLogoToggle();
@@ -276,7 +331,12 @@ function init() {
   $('edit-message').addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') sendEdit();
   });
+  $('slides-md').addEventListener('input', (e) => {
+    state.markdown = e.target.value;
+    saveState();
+  });
   $('info-generate').addEventListener('click', generateInfographic);
+  rehydrate();
 }
 
 init();
