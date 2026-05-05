@@ -68,6 +68,7 @@ const RenderBodySchema = z.object({
   slides: z.array(SlideSchema).min(1),
   brand: z.string().optional(),
   filename: z.string().optional(),
+  showLogo: z.boolean().optional(),
 });
 
 export function slidesRouter(): Router {
@@ -135,7 +136,7 @@ export function slidesRouter(): Router {
     try {
       const body = RenderBodySchema.parse(req.body);
       const brand = await loadBrand(body.brand ?? 'default');
-      const html = renderDeck(body.slides as Slide[], brand);
+      const html = renderDeck(body.slides as Slide[], brand, { showLogo: body.showLogo });
       res.type('html').send(html);
     } catch (err) {
       next(err);
@@ -161,7 +162,7 @@ export function slidesRouter(): Router {
     try {
       const body = RenderBodySchema.parse(req.body);
       const brand = await loadBrand(body.brand ?? 'default');
-      const html = renderDeck(body.slides as Slide[], brand);
+      const html = renderDeck(body.slides as Slide[], brand, { showLogo: body.showLogo });
       const filename = (body.filename ?? `${brand.name}-deck`).replace(/[^\w.-]+/g, '-');
       res
         .type('html')

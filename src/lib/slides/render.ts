@@ -154,9 +154,20 @@ html, body { width: 100%; height: 100%; background: #0a0a0b; overflow: hidden; f
   font-family: var(--font-body); font-size: 10px; font-weight: 600;
   letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent);
 }
-.content .page-num {
-  font-family: var(--font-body); font-size: 11px; font-weight: 500;
-  color: var(--text-muted);
+.content .slide-footer {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 36px; padding: 0 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--rule);
+  z-index: 1;
+}
+.content .slide-footer .footer-logo {
+  height: 20px; width: auto; opacity: 0.85;
+  display: block;
+}
+.content .slide-footer .footer-page {
+  font-family: var(--font-body); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.04em; color: var(--text-muted);
 }
 .content h2 {
   position: absolute; top: 76px; left: 40px; right: 60px;
@@ -166,7 +177,7 @@ html, body { width: 100%; height: 100%; background: #0a0a0b; overflow: hidden; f
   overflow: hidden;
 }
 .content .content-area {
-  position: absolute; top: 156px; left: 40px; right: 40px; bottom: 40px;
+  position: absolute; top: 156px; left: 40px; right: 40px; bottom: 52px;
   display: flex; flex-direction: column;
   overflow: hidden;
 }
@@ -566,9 +577,18 @@ function renderSection(s: SectionSlide): string {
 </section>`;
 }
 
-function renderContent(s: ContentSlide, page: number, total: number): string {
+function renderContent(
+  s: ContentSlide,
+  page: number,
+  total: number,
+  brand: Brand,
+  showLogo: boolean,
+): string {
   const moduleLabel = s.moduleLabel ? escapeHtml(s.moduleLabel) : '';
   const pageStr = `${String(page).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+  const logoEl = showLogo && brand.logo
+    ? `<img class="footer-logo" src="${escapeHtml(brand.logo.dataUrl)}" alt="${escapeHtml(brand.displayName)}">`
+    : `<span></span>`;
   // The slide root id lives on an INNER wrapper, never on the <section>.
   // If the LLM scopes its CSS as `#sN { position: relative; ... }` and that
   // selector matched the <section>, it would override `.slide`'s absolute
@@ -577,10 +597,10 @@ function renderContent(s: ContentSlide, page: number, total: number): string {
   return `<section class="slide content" data-slide-id="${escapeHtml(s.id)}">
   <div class="top-bar">
     <span class="module-label">${moduleLabel}</span>
-    <span class="page-num">${pageStr}</span>
   </div>
   <h2>${escapeHtml(s.title)}</h2>
   <div class="content-area"><div id="${escapeHtml(s.id)}" class="slide-root">${balanceTags(s.html)}</div></div>
+  <div class="slide-footer">${logoEl}<span class="footer-page">${pageStr}</span></div>
 </section>`;
 }
 
@@ -593,14 +613,20 @@ function renderThanks(s: ThanksSlide): string {
 </section>`;
 }
 
-function renderSlide(slide: Slide, page: number, total: number): string {
+function renderSlide(
+  slide: Slide,
+  page: number,
+  total: number,
+  brand: Brand,
+  showLogo: boolean,
+): string {
   switch (slide.type) {
     case 'cover':
       return renderCover(slide);
     case 'section':
       return renderSection(slide);
     case 'content':
-      return renderContent(slide, page, total);
+      return renderContent(slide, page, total, brand, showLogo);
     case 'thanks':
       return renderThanks(slide);
   }
@@ -608,12 +634,17 @@ function renderSlide(slide: Slide, page: number, total: number): string {
 
 export interface RenderOptions {
   title?: string;
+  /** Show the brand logo in the slide footer when the brand has one. Default true. */
+  showLogo?: boolean;
 }
 
 export function renderDeck(slides: Slide[], brand: Brand, opts: RenderOptions = {}): string {
   const title = opts.title ?? `${brand.displayName} — Deck`;
+  const showLogo = opts.showLogo ?? true;
   const total = slides.length;
-  const slidesHtml = slides.map((s, idx) => renderSlide(s, idx + 1, total)).join('\n');
+  const slidesHtml = slides
+    .map((s, idx) => renderSlide(s, idx + 1, total, brand, showLogo))
+    .join('\n');
   const llmCss = slides
     .filter((s): s is ContentSlide => s.type === 'content')
     .map((s) => s.css)

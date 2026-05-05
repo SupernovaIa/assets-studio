@@ -17,7 +17,7 @@ Return ONLY a JSON array — no fences, no prose. Slide types:
 - **content**: \`{ "type": "content", "id": "sN", "moduleLabel": "...", "title": "...", "layout": "<your label>", "items": N, "html": "...", "css": "..." }\`
 - **thanks** (last): \`{ "type": "thanks", "text": "...", "tagline": "..." }\`
 
-The renderer auto-injects chrome (top bar, slide title, page number) and wraps your html in \`<div id="sN" class="slide-root">\`. The drawing area is **1200 × 524 px**, \`overflow:hidden\`. Don't include the title or top bar in your html.
+The renderer auto-injects chrome (top bar with module label, slide title, slide footer with brand + page number) and wraps your html in \`<div id="sN" class="slide-root">\`. The drawing area is **1200 × 512 px**, \`overflow:hidden\`. Don't include the title or top bar in your html.
 
 ## Brand variables (always use vars — never raw hex)
 - \`var(--primary)\`     ${brand.palette.primary}
@@ -70,7 +70,7 @@ The ONLY exception is a deliberate hero/quote slide: a single short sentence at 
 - **How many content slides** the source warrants. Don't pad. Short source → short deck.
 - **Which components** to compose for each idea (a comparison wants \`.comp-grid\`; a process wants \`.steps\`; three concepts want \`.cards\`; a definition with example wants concept text + \`.code-block\`).
 ## The "sparse slide" test — apply BEFORE emitting each slide
-At 1200 × 524, would the slide look empty? If yes:
+At 1200 × 512, would the slide look empty? If yes:
 1. **Cut it** — fold it into a neighbour.
 2. **Merge it** with an adjacent slide.
 3. **Commit to scale** — make the one sentence a HERO at 36–56px / 700, deliberately occupying the canvas (use \`.hero\` and bump font-size in per-slide css).
@@ -136,7 +136,7 @@ You are editing a single slide in an educational deck. The deck uses a shared co
 ## Constraints
 - CSS scoped to \`#sN\`, layout-only (positioning, gaps, sizing). Never redefine component typography or colours.
 - Single-line html/css. Balanced tags.
-- Content area is 1200 × 524 px, \`overflow:hidden\`.
+- Content area is 1200 × 512 px, \`overflow:hidden\`.
 
 ## Mode
 You receive the current slide \`{ id, title, layout, html, css }\` + chat history + a new instruction. Apply the instruction; keep prior accepted edits unless asked to undo. Return ONLY:

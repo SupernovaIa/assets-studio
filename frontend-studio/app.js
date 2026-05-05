@@ -3,6 +3,7 @@
 
 const state = {
   brand: 'default',
+  showLogo: true,
   slides: [],
   chats: [],
   selectedIndex: -1,
@@ -64,6 +65,18 @@ async function loadBrands() {
   }
 }
 
+function initLogoToggle() {
+  const cb = $('logo-toggle');
+  if (!cb) return;
+  cb.checked = state.showLogo;
+  cb.addEventListener('change', () => {
+    state.showLogo = cb.checked;
+    if (state.slides.length > 0) {
+      refreshPreview();
+    }
+  });
+}
+
 // ── Tabs ────────────────────────────────────────────────────────────────────
 function initTabs() {
   document.querySelectorAll('.tab').forEach((btn) => {
@@ -82,7 +95,7 @@ async function refreshPreview() {
     $('slides-preview').srcdoc = '';
     return;
   }
-  const res = await api('/api/slides/preview', { slides: state.slides, brand: state.brand });
+  const res = await api('/api/slides/preview', { slides: state.slides, brand: state.brand, showLogo: state.showLogo });
   const html = await res.text();
   $('slides-preview').srcdoc = html;
 }
@@ -205,6 +218,7 @@ async function downloadDeck() {
     const res = await api('/api/slides/download', {
       slides: state.slides,
       brand: state.brand,
+      showLogo: state.showLogo,
       filename: `${state.brand}-deck`,
     });
     const blob = await res.blob();
@@ -254,6 +268,7 @@ async function generateInfographic() {
 function init() {
   initTabs();
   loadBrands();
+  initLogoToggle();
   $('slides-generate').addEventListener('click', generateSlides);
   $('slides-download').addEventListener('click', downloadDeck);
   $('edit-send').addEventListener('click', sendEdit);
