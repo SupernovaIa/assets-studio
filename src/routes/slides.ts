@@ -5,6 +5,7 @@ import { loadBrand } from '@/lib/brand.js';
 import { editContentSlide } from '@/lib/slides/edit.js';
 import { generateSlides } from '@/lib/slides/generate.js';
 import { renderDeck } from '@/lib/slides/render.js';
+import { buildShowcaseSlides } from '@/lib/slides/showcase.js';
 import type { ContentSlide, Slide } from '@/lib/slides/types.js';
 
 const CoverSlideSchema = z.object({
@@ -135,6 +136,20 @@ export function slidesRouter(): Router {
       const body = RenderBodySchema.parse(req.body);
       const brand = await loadBrand(body.brand ?? 'default');
       const html = renderDeck(body.slides as Slide[], brand);
+      res.type('html').send(html);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // GET /api/slides/showcase — static deck exercising every component.
+  router.get('/showcase', async (req, res, next) => {
+    try {
+      const brandName = typeof req.query.brand === 'string' ? req.query.brand : 'default';
+      const brand = await loadBrand(brandName);
+      const html = renderDeck(buildShowcaseSlides(), brand, {
+        title: `${brand.displayName} — Component library`,
+      });
       res.type('html').send(html);
     } catch (err) {
       next(err);
