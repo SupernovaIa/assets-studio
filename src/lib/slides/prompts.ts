@@ -1,10 +1,9 @@
 import type { Brand } from '@/lib/brand.js';
 
 /**
- * Single-call prompt: minimal scaffolding (output schema + brand + chrome
- * contract + non-negotiables) plus two concrete few-shot examples that carry
- * the editorial signal. Number of slides, layouts, density, and decoration are
- * the LLM's call — guided by examples, not by rules.
+ * Single-call prompt: the renderer ships a pre-styled component library, so
+ * the LLM's job is to COMPOSE components — not invent CSS. Per-slide CSS is
+ * reserved for layout (positioning, gaps, custom grids).
  */
 export function buildSlidesPrompt(brand: Brand): string {
   return `
@@ -18,54 +17,66 @@ Return ONLY a JSON array — no fences, no prose. Slide types:
 - **content**: \`{ "type": "content", "id": "sN", "moduleLabel": "...", "title": "...", "layout": "<your label>", "items": N, "html": "...", "css": "..." }\`
 - **thanks** (last): \`{ "type": "thanks", "text": "...", "tagline": "..." }\`
 
-The renderer auto-injects chrome:
-- cover/section/thanks: gradient background + large title + accent bar — provide text only.
-- content slides: top bar (module label + page number), slide title, brand logo. Your "html" is wrapped in \`<div id="sN" class="slide-root">\` which already has \`display:flex; flex-direction:column; flex:1; min-height:0; justify-content:center; position:relative;\` — content is vertically centred by default. The drawing area is **1200 × 524 px**, surface background, \`overflow:hidden\`. Don't redefine those base properties (override \`justify-content\` only if a top- or space-between-anchored layout is intentional).
+The renderer auto-injects chrome (top bar, slide title, page number) and wraps your html in \`<div id="sN" class="slide-root">\`. The drawing area is **1200 × 524 px**, \`overflow:hidden\`. Don't include the title or top bar in your html.
 
-## Brand
-Palette CSS variables (use these — never raw hex):
+## Brand variables (always use vars — never raw hex)
 - \`var(--primary)\`     ${brand.palette.primary}
 - \`var(--accent)\`      ${brand.palette.accent}
 - \`var(--secondary)\`   ${brand.palette.secondary}
 - \`var(--surface)\`     ${brand.palette.surface}
 - \`var(--text)\`        ${brand.palette.text}
 - \`var(--text-muted)\`  ${brand.palette.textMuted}
+- \`var(--success)\` \`var(--warning)\` \`var(--danger)\` — semantic
+- \`var(--accent-pale)\` — soft tinted background
+- Fonts: \`var(--font-heading)\`, \`var(--font-body)\`, \`var(--font-mono)\`
 
-Fonts (already loaded — always quote):
-- Headings: '${brand.fonts.heading.family}', sans-serif
-- Body:     '${brand.fonts.body.family}', sans-serif
+## Component catalogue — COMPOSE THESE, do not redefine their typography or colours
+Content slides always use the brand surface (white) as background and dark text. Add visual variety through layout and component choice, not background colour.
+
+| class | purpose |
+|---|---|
+| \`.label\` | eyebrow / kicker — short, uppercase |
+| \`.body\`  | paragraph text (14px) |
+| \`.sub\`   | subtitle / dimmed paragraph |
+| \`.dim\`   | muted text variant |
+| \`.accent-line\` | small horizontal divider |
+| \`.hero\`  | big 28px heading inside a slide |
+| \`.bullets > li\` | dot-prefixed list |
+| \`<code>\` | inline code (mint pill) |
+| \`.code-block\` | multi-line code; spans \`.kw\` \`.str\` \`.cm\` \`.fg\` for highlight; optional \`.lang-badge\` |
+| \`.callout.note\` / \`.callout.warn\` / \`.callout.success\` | coloured top border + soft bg + circular \`.icon\` + \`.callout-title\` + \`.callout-body\` |
+| \`.cards > .card\` | 3-column grid; each card has \`.card-icon\` \`.card-title\` \`.card-body\` |
+| \`.steps > .step\` | numbered process; each step: \`<div class="step-num">N</div><div class="step-text">…</div>\` |
+| \`.comp-grid\` | yes/no comparison; \`.comp-col.yes\` / \`.comp-col.no\` with \`.comp-header\` + \`.comp-body\` containing \`.comp-row\`s |
+| \`.tag\` | small pill label |
+
+## Per-slide CSS — only for LAYOUT
+Use the \`css\` field for positioning, gaps, custom grids, sizing — scoped to \`#sN\`. Do NOT redefine component typography, colours or backgrounds. Example: \`#s2 .row { display:flex; gap:32px; }\` ✅. \`#s2 .body { font-size: 18px; }\` ❌.
+
+You may add custom classes for layout-only utilities scoped under \`#sN\`. Never reuse forbidden names: \`slide\`, \`deck\`, \`nav\`, \`slide-root\`. Don't repeat the slide id as a class.
+
+## Vertical alignment — top by default
+Content slides start TOP-aligned: content sits immediately under the title, no extra empty space above. **Do NOT add \`justify-content:center\` on \`#sN\` or \`align-items:center\` on rows just to vertically centre the content.** That is the failure mode of the previous deck — slides with a small block of content floating in the middle of a tall canvas. Let content stack from the top and breathe naturally.
+
+The ONLY exception is a deliberate hero/quote slide: a single short sentence at 36–56px that you want to occupy the canvas as a statement. In that case, and only that case, you may centre vertically.
 
 ## You decide
-- **How many content slides** the source warrants. Don't pad. A short source → a short deck.
-- **The layout** for each slide (two columns, hero number, code+concept, list, table, quote, metrics, full-bleed statement — whatever fits the content). The "layout" field is just a label you choose for your own reference.
+- **How many content slides** the source warrants. Don't pad. Short source → short deck.
+- **Which components** to compose for each idea (a comparison wants \`.comp-grid\`; a process wants \`.steps\`; three concepts want \`.cards\`; a definition with example wants concept text + \`.code-block\`).
+## The "sparse slide" test — apply BEFORE emitting each slide
+At 1200 × 524, would the slide look empty? If yes:
+1. **Cut it** — fold it into a neighbour.
+2. **Merge it** with an adjacent slide.
+3. **Commit to scale** — make the one sentence a HERO at 36–56px / 700, deliberately occupying the canvas (use \`.hero\` and bump font-size in per-slide css).
 
-## The "sparse slide" test — apply BEFORE emitting each content slide
+Failure mode: 2 short bullets centred on white space. Avoid.
 
-Picture the slide rendered at 1200 × 524 px with the content you're about to emit. Ask: **would this look empty?** If yes, you have THREE options — pick one, never just centre tiny content on a large canvas:
+## Hard rules
+- Single-line \`html\` and \`css\` strings. \`\\n\` only inside \`<pre>\` / \`.code-block\`.
+- Balanced HTML — every \`<div>\` matched. Stray closes break later slides.
+- The slide-root vertically fills the canvas but does NOT auto-centre. If you want the row centred vertically, add \`#sN .row { flex:1; min-height:0; align-items:center; }\` or \`justify-content:center\` on the slide-root via \`#sN { justify-content:center; }\`.
 
-1. **Cut the slide.** If the idea is so small it can't fill 1200 × 524 with substance OR with deliberate scale, it isn't a slide. It's a sentence in another slide. Drop it.
-2. **Merge it with an adjacent slide.** Two thin slides on related ideas → one solid slide that compares them.
-3. **Commit to scale.** A slide with one short sentence is fine — but only if you make that sentence a HERO at 36–56 px / 700, occupying the canvas as a deliberate statement. Two sentences at 14 px floating in the middle is the failure mode you must avoid.
-
-Concrete rule of thumb:
-- 1 sentence at body size (14–16 px) → not a slide, fold it into a neighbour.
-- 1 sentence at hero size (36–56 px) → great slide.
-- 3+ items / a full grid / a code block / a comparison → great slide at body size.
-- 2 short bullets centred on white space → failure. Cut, merge, or escalate the typography.
-
-When in doubt: **fewer slides, denser slides** wins.
-
-## Non-negotiables
-- All CSS scoped to the slide id: \`#s2 .my-class { ... }\`. Slide root: \`#sN { font-family: '${brand.fonts.body.family}', sans-serif; color: var(--text); }\`.
-- **Reuse class vocabulary across slides.** Settle on canonical names (\`.label\`, \`.body\`, \`.hero\`, \`.col\`, \`.step\`, \`.code\`, \`.mono\`) and use the SAME font-size / weight / color for the same name on every slide. Consistency between slides matters as much as the quality of any single slide.
-- **Balanced HTML.** Every \`<div>\` matched with \`</div>\`, every \`<p>\` with \`</p>\`. A stray close cascades and breaks subsequent slides — count opens vs closes before emitting each slide.
-- All html and css strings on a SINGLE LINE. Use \\\\n only inside \`<pre>\` for code.
-- Don't include the slide title or top bar inside the html (renderer injects them).
-- Forbidden class names: \`slide\`, \`deck\`, \`nav\`. Don't repeat the slide id as a class.
-- Use only CSS variables from the palette — no raw hex.
-- **Don't put \`flex:1\` on the outer row unless you genuinely need columns to stretch to full canvas height** (e.g. code panel that must fill). For most layouts, let the row size to its content and the slide-root will centre it vertically. \`flex:1; min-height:0\` on the row defeats the default centring.
-
-## Examples — note the SAME .label and .body sizes on both slides
+## Two examples — note how html composes components and css only positions
 
 \`\`\`json
 [
@@ -73,15 +84,21 @@ When in doubt: **fewer slides, denser slides** wins.
   { "type": "section", "number": 1, "label": "UNIDAD 1", "title": "¿Qué es una red neuronal?" },
   {
     "type": "content", "id": "s2", "moduleLabel": "MÓDULO 1 · TEMA 1",
-    "title": "Tres conceptos clave", "layout": "three-col", "items": 3,
-    "html": "<div class=\\"row\\"><div class=\\"col\\"><span class=\\"label\\">01</span><h3 class=\\"hero\\">Neurona</h3><p class=\\"body\\">Unidad básica que recibe entradas, las pondera y emite una salida.</p></div><div class=\\"col\\"><span class=\\"label\\">02</span><h3 class=\\"hero\\">Capa</h3><p class=\\"body\\">Conjunto de neuronas en paralelo. Las redes apilan varias en serie.</p></div><div class=\\"col\\"><span class=\\"label\\">03</span><h3 class=\\"hero\\">Pesos</h3><p class=\\"body\\">Parámetros aprendidos que determinan la fuerza de cada conexión.</p></div></div>",
-    "css": "#s2 .row { display:flex; gap:48px; align-items:flex-start; } #s2 .col { flex:1; min-width:0; } #s2 .label { display:block; font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px; } #s2 .hero { font-family:'${brand.fonts.heading.family}', sans-serif; font-size:24px; font-weight:700; color:var(--text); line-height:1.25; margin:0 0 10px; } #s2 .body { font-size:15px; color:var(--text); line-height:1.55; margin:0; }"
+    "title": "Tres conceptos clave", "layout": "three-cards", "items": 3,
+    "html": "<span class=\\"label\\">Fundamentos</span><div class=\\"accent-line\\"></div><div class=\\"cards\\"><div class=\\"card\\"><div class=\\"card-icon\\">◉</div><div class=\\"card-title\\">Neurona</div><div class=\\"card-body\\">Unidad básica que recibe entradas, las pondera y emite una salida.</div></div><div class=\\"card\\"><div class=\\"card-icon\\">≡</div><div class=\\"card-title\\">Capa</div><div class=\\"card-body\\">Conjunto de neuronas en paralelo. Las redes apilan varias en serie.</div></div><div class=\\"card\\"><div class=\\"card-icon\\">⚖</div><div class=\\"card-title\\">Pesos</div><div class=\\"card-body\\">Parámetros aprendidos que determinan la fuerza de cada conexión.</div></div></div>",
+    "css": "#s2 .cards { margin-top:6px; }"
   },
   {
     "type": "content", "id": "s3", "moduleLabel": "MÓDULO 1 · TEMA 1",
     "title": "Forward pass mínimo", "layout": "concept+code", "items": 2,
-    "html": "<div class=\\"row\\"><div class=\\"left\\"><span class=\\"label\\">FORWARD PASS</span><p class=\\"body\\">Cada capa multiplica la entrada por sus pesos, suma el sesgo y aplica una activación. La salida de una capa es la entrada de la siguiente.</p></div><pre class=\\"code\\"><span class=\\"kw\\">import</span> torch.nn <span class=\\"kw\\">as</span> nn\\n\\nlayer = nn.Linear(<span class=\\"num\\">10</span>, <span class=\\"num\\">5</span>)\\nx = torch.randn(<span class=\\"num\\">1</span>, <span class=\\"num\\">10</span>)\\ny = layer(x)</pre></div>",
-    "css": "#s3 .row { display:flex; gap:40px; flex:1; min-height:0; align-items:stretch; padding-top:8px; } #s3 .left { flex:0 0 38%; display:flex; flex-direction:column; justify-content:center; } #s3 .label { display:block; font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px; } #s3 .body { font-size:15px; color:var(--text); line-height:1.6; margin:0; } #s3 .code { flex:1; min-width:0; background:color-mix(in srgb, var(--text) 5%, transparent); padding:18px 22px; border-radius:6px; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:13px; line-height:1.6; color:var(--text); white-space:pre; overflow:hidden; margin:0; } #s3 .code .kw { color:var(--accent); font-weight:600; } #s3 .code .num { color:var(--text); font-weight:600; }"
+    "html": "<div class=\\"row\\"><div class=\\"left\\"><span class=\\"label\\">Forward pass</span><p class=\\"body\\">Cada capa multiplica la entrada por sus pesos, suma el sesgo y aplica una activación. La salida de una capa es la entrada de la siguiente.</p></div><pre class=\\"code-block\\"><span class=\\"kw\\">import</span> torch.nn <span class=\\"kw\\">as</span> nn\\n\\nlayer = nn.Linear(<span class=\\"fg\\">10</span>, <span class=\\"fg\\">5</span>)\\nx = torch.randn(<span class=\\"fg\\">1</span>, <span class=\\"fg\\">10</span>)\\ny = layer(x)</pre></div>",
+    "css": "#s3 .row { display:flex; gap:36px; align-items:flex-start; } #s3 .left { flex:0 0 38%; } #s3 .code-block { flex:1; min-width:0; }"
+  },
+  {
+    "type": "content", "id": "s4", "moduleLabel": "MÓDULO 1 · TEMA 1",
+    "title": "Sí y no de las redes neuronales", "layout": "comparison", "items": 4,
+    "html": "<div class=\\"comp-grid\\"><div class=\\"comp-col yes\\"><div class=\\"comp-header\\">Sirve para</div><div class=\\"comp-body\\"><div class=\\"comp-row\\">Reconocer patrones complejos en imágenes y audio.</div><div class=\\"comp-row\\">Predecir series temporales con suficientes datos.</div></div></div><div class=\\"comp-col no\\"><div class=\\"comp-header\\">No sirve para</div><div class=\\"comp-body\\"><div class=\\"comp-row\\">Casos con muy pocos datos etiquetados.</div><div class=\\"comp-row\\">Decisiones que exigen explicabilidad estricta.</div></div></div></div>",
+    "css": ""
   },
   { "type": "thanks", "text": "¡Hasta la próxima!", "tagline": "Gracias por seguir aprendiendo." }
 ]
@@ -92,29 +109,21 @@ Return the JSON array now.
 }
 
 /**
- * Edit prompt for a single content slide. Same brand contract; the user message
- * supplies the current slide + chat history + new instruction.
+ * Edit prompt for a single content slide.
  */
 export function buildEditPrompt(brand: Brand): string {
   return `
-You are editing a single slide in an educational deck.
+You are editing a single slide in an educational deck. The deck uses a shared component library — prefer changing data over styles.
 
-## Brand
-Palette CSS variables (use these — never raw hex):
-- \`var(--primary)\`     ${brand.palette.primary}
-- \`var(--accent)\`      ${brand.palette.accent}
-- \`var(--secondary)\`   ${brand.palette.secondary}
-- \`var(--surface)\`     ${brand.palette.surface}
-- \`var(--text)\`        ${brand.palette.text}
-- \`var(--text-muted)\`  ${brand.palette.textMuted}
+## Brand vars (use these — never raw hex)
+\`var(--primary)\` ${brand.palette.primary}, \`var(--accent)\` ${brand.palette.accent}, \`var(--surface)\` ${brand.palette.surface}, \`var(--text)\` ${brand.palette.text}, \`var(--text-muted)\` ${brand.palette.textMuted}, \`var(--success)\`, \`var(--warning)\`, \`var(--danger)\`, \`var(--accent-pale)\`. Fonts: \`var(--font-heading)\`, \`var(--font-body)\`, \`var(--font-mono)\`.
 
-Fonts:
-- Headings: '${brand.fonts.heading.family}', sans-serif
-- Body:     '${brand.fonts.body.family}', sans-serif
+## Components available (do NOT redefine their styles)
+\`.label\`, \`.body\`, \`.sub\`, \`.dim\`, \`.accent-line\`, \`.hero\`, \`.bullets\`, \`<code>\`, \`.code-block\` (\`.kw\`/\`.str\`/\`.cm\`/\`.fg\`), \`.callout.note\`/\`.warn\`/\`.success\`, \`.cards > .card\`, \`.steps > .step\`, \`.comp-grid\`, \`.tag\`.
 
 ## Constraints
-- CSS scoped to \`#sN\`. Single-line html/css. Balanced tags.
-- Reuse the existing class vocabulary on the slide; don't reinvent typography.
+- CSS scoped to \`#sN\`, layout-only (positioning, gaps, sizing). Never redefine component typography or colours.
+- Single-line html/css. Balanced tags.
 - Content area is 1200 × 524 px, \`overflow:hidden\`.
 
 ## Mode
@@ -122,7 +131,7 @@ You receive the current slide \`{ id, title, layout, html, css }\` + chat histor
 
 \`{ "summary": "...", "html": "...", "css": "..." }\`
 
-- \`summary\`: ≤ 20-word Spanish sentence. Becomes the chat reply.
+- \`summary\`: ≤ 20-word Spanish sentence (becomes the chat reply).
 - \`html\` / \`css\`: the FULL updated slide (not a diff).
 `.trim();
 }

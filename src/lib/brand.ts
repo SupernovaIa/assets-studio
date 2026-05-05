@@ -41,7 +41,62 @@ const BrandJsonSchema = z.object({
       styleHint: z.string().default(''),
     })
     .optional(),
+  semanticPalette: z
+    .object({
+      success: z.string().optional(),
+      warning: z.string().optional(),
+      danger: z.string().optional(),
+      accentPale: z.string().optional(),
+      code: z
+        .object({
+          background: z.string().optional(),
+          foreground: z.string().optional(),
+          comment: z.string().optional(),
+          string: z.string().optional(),
+          keyword: z.string().optional(),
+        })
+        .optional(),
+    })
+    .optional(),
 });
+
+export interface SemanticPalette {
+  success: string;
+  warning: string;
+  danger: string;
+  accentPale: string;
+  /**
+   * Foreground colour to use on top of `accent` (e.g. text inside a step-num
+   * circle, a tag pill, or a callout icon). Computed from the accent's
+   * luminance so light accents pair with dark ink and dark accents with white.
+   */
+  accentInk: string;
+  code: {
+    background: string;
+    foreground: string;
+    comment: string;
+    string: string;
+    keyword: string;
+  };
+}
+
+/**
+ * Pick a foreground colour that contrasts with the given background hex.
+ * Returns `darkInk` if the background is light, `#ffffff` otherwise.
+ * Uses the WCAG relative-luminance threshold of 0.5.
+ */
+function pickInk(bgHex: string, darkInk: string): string {
+  const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(bgHex.trim());
+  if (!m) return '#ffffff';
+  let hex = m[1];
+  if (hex.length === 3) hex = hex.split('').map((c) => c + c).join('');
+  const r = parseInt(hex.slice(0, 2), 16) / 255;
+  const g = parseInt(hex.slice(2, 4), 16) / 255;
+  const b = parseInt(hex.slice(4, 6), 16) / 255;
+  const lin = (c: number) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  return L > 0.5 ? darkInk : '#ffffff';
+}
 
 export type BrandJson = z.infer<typeof BrandJsonSchema>;
 export type LogoPosition = (typeof LOGO_POSITIONS)[number];
@@ -65,6 +120,7 @@ export interface Brand {
    */
   briefExemplar: string;
   infographic: { styleHint: string };
+  semantic: SemanticPalette;
 }
 
 export interface LoadBrandOptions {
@@ -146,6 +202,21 @@ async function normalize(brandsDir: string, brandDir: string, json: BrandJson): 
 
   const extraCss = (await readOptional(path.join(brandDir, 'extra.css'))) ?? '';
   const briefExemplar = await loadBriefExemplar(brandsDir, brandDir);
+  const sp = json.semanticPalette ?? {};
+  const semantic: SemanticPalette = {
+    success: sp.success ?? '#2E7D5A',
+    warning: sp.warning ?? '#D4930A',
+    danger: sp.danger ?? '#B03030',
+    accentPale: sp.accentPale ?? `color-mix(in srgb, ${json.palette.accent} 14%, ${json.palette.surface})`,
+    accentInk: pickInk(json.palette.accent, json.palette.primary),
+    code: {
+      background: sp.code?.background ?? '#0F1E28',
+      foreground: sp.code?.foreground ?? '#A8D5CF',
+      comment: sp.code?.comment ?? '#4E7A8C',
+      string: sp.code?.string ?? '#F5C97A',
+      keyword: sp.code?.keyword ?? '#7EB8F5',
+    },
+  };
 
   return {
     name: json.name,
@@ -160,6 +231,7 @@ async function normalize(brandsDir: string, brandDir: string, json: BrandJson): 
     extraCss,
     briefExemplar,
     infographic: { styleHint: json.infographic?.styleHint ?? '' },
+    semantic,
   };
 }
 

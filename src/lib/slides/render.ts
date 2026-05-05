@@ -58,6 +58,7 @@ function balanceTags(html: string): string {
 }
 
 function brandRootCss(brand: Brand): string {
+  const s = brand.semantic;
   return `:root {
   --primary: ${brand.palette.primary};
   --accent: ${brand.palette.accent};
@@ -65,8 +66,20 @@ function brandRootCss(brand: Brand): string {
   --surface: ${brand.palette.surface};
   --text: ${brand.palette.text};
   --text-muted: ${brand.palette.textMuted};
+  --success: ${s.success};
+  --warning: ${s.warning};
+  --danger:  ${s.danger};
+  --accent-pale: ${s.accentPale};
+  --accent-ink:  ${s.accentInk};
+  --code-bg: ${s.code.background};
+  --code-fg: ${s.code.foreground};
+  --code-cm: ${s.code.comment};
+  --code-str: ${s.code.string};
+  --code-kw: ${s.code.keyword};
+  --rule: color-mix(in srgb, var(--text) 12%, transparent);
   --font-heading: '${brand.fonts.heading.family}', sans-serif;
   --font-body: '${brand.fonts.body.family}', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }`;
 }
 
@@ -126,12 +139,16 @@ html, body { width: 100%; height: 100%; background: #0a0a0b; overflow: hidden; f
 }
 .section-slide .accent-bar { width: 48px; height: 3px; background: var(--accent); margin-top: 24px; }
 
-/* Content chrome */
-.content { background: var(--surface); }
+/* Content chrome — content slides always use the brand surface (white). */
+.content {
+  background: var(--surface);
+  color: var(--text);
+}
+
 .content .top-bar {
   position: absolute; top: 0; left: 0; right: 0; height: 56px;
   padding: 0 40px; display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  border-bottom: 1px solid var(--rule);
 }
 .content .module-label {
   font-family: var(--font-body); font-size: 10px; font-weight: 600;
@@ -145,7 +162,6 @@ html, body { width: 100%; height: 100%; background: #0a0a0b; overflow: hidden; f
   position: absolute; top: 78px; left: 40px; right: 60px;
   font-family: var(--font-heading); font-size: 26px; font-weight: 700;
   color: var(--text); line-height: 1.25;
-  /* Cap the title to 2 lines so a long heading cannot push into the content area. */
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -157,7 +173,6 @@ html, body { width: 100%; height: 100%; background: #0a0a0b; overflow: hidden; f
 .content .content-area > .slide-root {
   display: flex; flex-direction: column;
   flex: 1; min-height: 0;
-  justify-content: center;
   position: relative;
 }
 
@@ -196,6 +211,154 @@ html, body { width: 100%; height: 100%; background: #0a0a0b; overflow: hidden; f
 @media (prefers-reduced-motion: reduce) {
   .slide { transition: opacity 0.2s ease; transform: none !important; }
   .slide.is-prev, .slide:not(.is-active) { transform: none !important; }
+}
+`.trim();
+
+/**
+ * Pre-styled component library scoped to `.slide-root`. Slides compose these
+ * classes rather than inventing CSS.
+ */
+const COMPONENT_CSS = `
+.slide-root { font-family: var(--font-body); color: var(--text); }
+
+/* Typography primitives */
+.slide-root .label {
+  display: block; font-size: 10px; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 12px;
+}
+.slide-root .body {
+  font-size: 14px; font-weight: 400; line-height: 1.7;
+  color: var(--text);
+}
+.slide-root .sub {
+  font-size: 13px; font-weight: 300; line-height: 1.6;
+  color: var(--text-muted);
+}
+.slide-root .dim { color: var(--text-muted); }
+.slide-root .accent-line {
+  width: 44px; height: 3px; background: var(--accent);
+  border-radius: 2px; margin: 6px 0 14px;
+}
+.slide-root .hero {
+  font-family: var(--font-heading);
+  font-size: 28px; font-weight: 700; line-height: 1.2;
+  color: var(--text); margin: 0 0 8px;
+}
+
+/* Bullets */
+.slide-root .bullets { list-style: none; display: flex; flex-direction: column; gap: 10px; padding: 0; margin: 0; }
+.slide-root .bullets li {
+  position: relative; padding-left: 18px;
+  font-size: 14px; line-height: 1.6; color: var(--text);
+}
+.slide-root .bullets li::before {
+  content: ''; position: absolute; left: 0; top: 9px;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+}
+
+/* Inline code + code block */
+.slide-root code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+  padding: 1px 6px; border-radius: 4px;
+}
+.slide-root .code-block {
+  background: var(--code-bg); color: var(--code-fg);
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1.65;
+  padding: 18px 22px; border-radius: 8px;
+  border-top: 2px solid var(--accent);
+  white-space: pre; overflow: hidden;
+  position: relative;
+}
+.slide-root .code-block .kw { color: var(--code-kw); }
+.slide-root .code-block .str { color: var(--code-str); }
+.slide-root .code-block .cm { color: var(--code-cm); font-style: italic; }
+.slide-root .code-block .fg { color: var(--code-fg); }
+.slide-root .code-block .lang-badge {
+  position: absolute; top: 10px; right: 14px;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.12em;
+  color: var(--accent-ink); background: var(--accent);
+  padding: 2px 10px; border-radius: 10px;
+}
+
+/* Callouts */
+.slide-root .callout {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 14px 18px; border-radius: 8px;
+}
+.slide-root .callout .icon {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; flex-shrink: 0; margin-top: 1px;
+}
+.slide-root .callout .callout-title { font-size: 12px; font-weight: 700; margin-bottom: 3px; color: var(--text); }
+.slide-root .callout .callout-body  { font-size: 12.5px; font-weight: 400; line-height: 1.6; color: var(--text-muted); }
+.slide-root .callout.note {
+  background: var(--accent-pale);
+  border-top: 2.5px solid var(--accent);
+}
+.slide-root .callout.note .icon { background: var(--accent); color: var(--accent-ink); }
+.slide-root .callout.warn {
+  background: color-mix(in srgb, var(--warning) 12%, var(--surface));
+  border-top: 2.5px solid var(--warning);
+}
+.slide-root .callout.warn .icon { background: var(--warning); color: #fff; }
+.slide-root .callout.success {
+  background: color-mix(in srgb, var(--success) 12%, var(--surface));
+  border-top: 2.5px solid var(--success);
+}
+.slide-root .callout.success .icon { background: var(--success); color: #fff; }
+
+/* Cards (3-col grid) */
+.slide-root .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.slide-root .card {
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-radius: 10px; padding: 18px 20px;
+}
+.slide-root .card .card-icon { font-size: 22px; margin-bottom: 8px; color: var(--accent); }
+.slide-root .card .card-title { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+.slide-root .card .card-body  { font-size: 12.5px; line-height: 1.6; color: var(--text-muted); }
+
+/* Numbered steps */
+.slide-root .steps { display: flex; flex-direction: column; gap: 12px; }
+.slide-root .step  { display: flex; gap: 14px; align-items: flex-start; }
+.slide-root .step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: var(--accent-ink);
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.slide-root .step-text { font-size: 13.5px; line-height: 1.65; color: var(--text); }
+
+/* yes/no comparison grid */
+.slide-root .comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.slide-root .comp-col  { border-radius: 10px; overflow: hidden; }
+.slide-root .comp-header {
+  padding: 10px 16px; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; color: #fff;
+}
+.slide-root .comp-col.yes .comp-header { background: var(--success); }
+.slide-root .comp-col.no  .comp-header { background: var(--danger);  }
+.slide-root .comp-body { background: var(--surface); }
+.slide-root .comp-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 16px; font-size: 12.5px; color: var(--text);
+  line-height: 1.5; border-bottom: 1px solid var(--rule);
+}
+.slide-root .comp-row:last-child { border-bottom: none; }
+
+/* Pill / tag */
+.slide-root .tag {
+  display: inline-block;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  background: var(--accent); color: var(--accent-ink);
+  padding: 4px 12px; border-radius: 20px;
 }
 `.trim();
 
@@ -326,6 +489,8 @@ export function renderDeck(slides: Slide[], brand: Brand, opts: RenderOptions = 
 ${brandRootCss(brand)}
 
 ${BASE_CSS}
+
+${COMPONENT_CSS}
 
 ${brand.extraCss}
 

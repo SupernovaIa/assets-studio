@@ -25,6 +25,10 @@ function stripJsonFences(text: string): string {
   let s = text.trim();
   s = s.replace(/^```(?:json)?\s*\n?/, '');
   s = s.replace(/\n?```\s*$/, '');
+  // Some replies wrap the JSON object in single backticks (`{...}`).
+  if (s.startsWith('`') && s.endsWith('`')) {
+    s = s.slice(1, -1);
+  }
   return s.trim();
 }
 
