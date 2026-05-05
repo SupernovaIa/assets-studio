@@ -22,9 +22,10 @@ export interface EditResult {
 }
 
 function stripJsonFences(text: string): string {
-  const trimmed = text.trim();
-  const fence = trimmed.match(/^```(?:json)?\s*([\s\S]*?)```$/);
-  return fence ? fence[1].trim() : trimmed;
+  let s = text.trim();
+  s = s.replace(/^```(?:json)?\s*\n?/, '');
+  s = s.replace(/\n?```\s*$/, '');
+  return s.trim();
 }
 
 export async function editContentSlide(
@@ -50,7 +51,7 @@ export async function editContentSlide(
 
   const response = await client.messages.create({
     model: opts.model ?? DEFAULT_MODEL,
-    max_tokens: 4096,
+    max_tokens: 8192,
     system,
     messages: [{ role: 'user', content: user }],
   });

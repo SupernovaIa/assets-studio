@@ -9,6 +9,54 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
+const VOID_TAGS = new Set([
+  'br', 'img', 'hr', 'input', 'meta', 'link', 'area', 'base', 'col', 'embed',
+  'source', 'track', 'wbr',
+]);
+
+/**
+ * LLM-generated HTML occasionally has mismatched tags (e.g. <p>...</div>).
+ * A stray close cascades and breaks subsequent slides. This balancer:
+ *  - drops stray close tags with no matching open
+ *  - auto-closes unclosed tags at the end
+ *  - when closing a tag, also closes any unclosed tags nested above it
+ * Operates on tag positions only — text content is preserved verbatim.
+ */
+function balanceTags(html: string): string {
+  const stack: string[] = [];
+  const out: string[] = [];
+  const tagRe = /<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g;
+  let lastIdx = 0;
+  let m: RegExpExecArray | null;
+  while ((m = tagRe.exec(html)) !== null) {
+    const full = m[0];
+    const name = m[1].toLowerCase();
+    const isClose = full.startsWith('</');
+    const isSelfClose = full.endsWith('/>') || VOID_TAGS.has(name);
+
+    out.push(html.slice(lastIdx, m.index));
+    if (isClose) {
+      const idx = stack.lastIndexOf(name);
+      if (idx !== -1) {
+        while (stack.length > idx) {
+          out.push(`</${stack.pop()}>`);
+        }
+      }
+    } else if (isSelfClose) {
+      out.push(full);
+    } else {
+      stack.push(name);
+      out.push(full);
+    }
+    lastIdx = m.index + full.length;
+  }
+  out.push(html.slice(lastIdx));
+  while (stack.length) {
+    out.push(`</${stack.pop()}>`);
+  }
+  return out.join('');
+}
+
 function brandRootCss(brand: Brand): string {
   return `:root {
   --primary: ${brand.palette.primary};
@@ -94,13 +142,22 @@ html, body { width: 100%; height: 100%; background: #0a0a0b; overflow: hidden; f
   color: var(--text-muted);
 }
 .content h2 {
-  position: absolute; top: 76px; left: 40px; right: 80px;
-  font-family: var(--font-heading); font-size: 30px; font-weight: 700;
-  color: var(--text); line-height: 1.2;
+  position: absolute; top: 78px; left: 40px; right: 60px;
+  font-family: var(--font-heading); font-size: 26px; font-weight: 700;
+  color: var(--text); line-height: 1.25;
+  /* Cap the title to 2 lines so a long heading cannot push into the content area. */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .content .content-area {
-  position: absolute; top: 136px; left: 40px; right: 40px; bottom: 40px;
+  position: absolute; top: 156px; left: 40px; right: 40px; bottom: 40px;
   display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.content .content-area > .slide-root {
+  display: flex; flex-direction: column;
+  flex: 1; min-height: 0;
+  position: relative;
 }
 
 /* Thanks */
@@ -133,6 +190,11 @@ html, body { width: 100%; height: 100%; background: #0a0a0b; overflow: hidden; f
 .nav .counter {
   color: rgba(255,255,255,0.75); font-size: 12px; min-width: 48px;
   text-align: center; font-family: 'Inter', sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide { transition: opacity 0.2s ease; transform: none !important; }
+  .slide.is-prev, .slide:not(.is-active) { transform: none !important; }
 }
 `.trim();
 
@@ -202,13 +264,18 @@ function renderSection(s: SectionSlide): string {
 function renderContent(s: ContentSlide, page: number, total: number): string {
   const moduleLabel = s.moduleLabel ? escapeHtml(s.moduleLabel) : '';
   const pageStr = `${String(page).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
-  return `<section class="slide content" id="${escapeHtml(s.id)}">
+  // The slide root id lives on an INNER wrapper, never on the <section>.
+  // If the LLM scopes its CSS as `#sN { position: relative; ... }` and that
+  // selector matched the <section>, it would override `.slide`'s absolute
+  // positioning and hide every content slide. Keeping the id off the section
+  // isolates LLM CSS from the chrome.
+  return `<section class="slide content" data-slide-id="${escapeHtml(s.id)}">
   <div class="top-bar">
     <span class="module-label">${moduleLabel}</span>
     <span class="page-num">${pageStr}</span>
   </div>
   <h2>${escapeHtml(s.title)}</h2>
-  <div class="content-area">${s.html}</div>
+  <div class="content-area"><div id="${escapeHtml(s.id)}" class="slide-root">${balanceTags(s.html)}</div></div>
 </section>`;
 }
 

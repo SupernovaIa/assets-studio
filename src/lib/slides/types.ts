@@ -12,19 +12,13 @@ export interface SectionSlide {
   title: string;
 }
 
-export interface ContentSlideOutline {
+export interface ContentSlide {
   type: 'content';
   id: string;
   moduleLabel?: string;
   title: string;
   layout: string;
   items: number;
-  hasCode?: boolean;
-  brief: string;
-  sourceLines?: string;
-}
-
-export interface ContentSlide extends ContentSlideOutline {
   html: string;
   css: string;
 }
@@ -36,4 +30,3 @@ export interface ThanksSlide {
 }
 
 export type Slide = CoverSlide | SectionSlide | ContentSlide | ThanksSlide;
-export type OutlineSlide = CoverSlide | SectionSlide | ContentSlideOutline | ThanksSlide;

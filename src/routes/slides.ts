@@ -28,9 +28,6 @@ const ContentSlideSchema = z.object({
   title: z.string(),
   layout: z.string(),
   items: z.number(),
-  hasCode: z.boolean().optional(),
-  brief: z.string(),
-  sourceLines: z.string().optional(),
   html: z.string(),
   css: z.string(),
 });
