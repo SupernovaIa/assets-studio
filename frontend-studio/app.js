@@ -52,6 +52,11 @@ async function loadBrands() {
     select.value = state.brand;
     select.addEventListener('change', () => {
       state.brand = select.value;
+      // No LLM call needed: slides reference brand vars, so re-rendering
+      // with a different brand recolours/refonts the deck for free.
+      if (state.slides.length > 0) {
+        refreshPreview();
+      }
     });
   } catch (err) {
     select.innerHTML = '<option>error</option>';
