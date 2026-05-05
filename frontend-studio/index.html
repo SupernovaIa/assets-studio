@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>slides-studio</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>slides-studio</h1>
+    <div class="brand-picker">
+      <label for="brand-select">Brand</label>
+      <select id="brand-select"><option>cargando…</option></select>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-tab="slides">Slides</button>
+      <button class="tab" data-tab="infographic">Infografía</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="slides-tab" class="tab-panel active">
+      <aside class="left">
+        <h2>Markdown</h2>
+        <textarea id="slides-md" placeholder="# Título&#10;&#10;Contenido en markdown…"></textarea>
+        <div class="actions">
+          <button id="slides-generate">Generar</button>
+          <button id="slides-download" disabled>Descargar HTML</button>
+        </div>
+        <div id="slides-status" class="status"></div>
+      </aside>
+      <section class="right">
+        <iframe id="slides-preview" title="Deck preview" sandbox="allow-scripts"></iframe>
+        <div class="slides-bottom">
+          <ol id="slides-list"></ol>
+          <aside id="slides-edit-panel" hidden>
+            <header class="edit-head">
+              <h3>Editar <span id="edit-slide-label"></span></h3>
+              <button id="edit-close" title="Cerrar">×</button>
+            </header>
+            <ul id="edit-chat"></ul>
+            <textarea id="edit-message" placeholder="Describe el cambio…"></textarea>
+            <div class="actions">
+              <button id="edit-send">Enviar</button>
+              <span id="edit-status" class="status"></span>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </section>
+
+    <section id="infographic-tab" class="tab-panel">
+      <aside class="left">
+        <h2>Markdown</h2>
+        <textarea id="info-md" placeholder="# Título&#10;&#10;Contenido en markdown…"></textarea>
+        <div class="actions">
+          <button id="info-generate">Generar</button>
+        </div>
+        <div id="info-status" class="status"></div>
+      </aside>
+      <section class="right info-right">
+        <img id="info-image" alt="" hidden>
+        <a id="info-download" class="download-btn" hidden download="infografia.png">Descargar PNG</a>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

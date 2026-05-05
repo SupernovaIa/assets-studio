@@ -1,3 +1,6 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import express, { type Express, type NextFunction, type Request, type Response } from 'express';
 import { ZodError } from 'zod';
 
@@ -5,10 +8,13 @@ import { brandsRouter } from '@/routes/brands.js';
 import { infographicRouter } from '@/routes/infographic.js';
 import { slidesRouter } from '@/routes/slides.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const FRONTEND_DIR = path.resolve(__dirname, '../frontend-studio');
+
 export function createApp(): Express {
   const app = express();
 
-  app.use(express.json({ limit: '2mb' }));
+  app.use(express.json({ limit: '4mb' }));
 
   app.get('/', (_req, res) => {
     res.json({ ok: true, service: 'slides-studio' });
@@ -17,6 +23,8 @@ export function createApp(): Express {
   app.use('/api/brands', brandsRouter());
   app.use('/api/slides', slidesRouter());
   app.use('/api/infographic', infographicRouter());
+
+  app.use('/studio', express.static(FRONTEND_DIR));
 
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
     if (err instanceof ZodError) {
